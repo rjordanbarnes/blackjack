@@ -34,8 +34,16 @@ class MainWindow(wx.Frame):
 
     def newGameStart(self, e):
         ''' Starts a game with the specified nunber of players.'''
+        numberOfPlayers = self.gamePrompt.numberOfPlayers
+        playerNameList = []
+        playerNameList.append("Empty")
+        playerNameList.append(self.gamePrompt.playerOneName)
+        playerNameList.append(self.gamePrompt.playerTwoName)
+        playerNameList.append(self.gamePrompt.playerThreeName)
+        playerNameList.append(self.gamePrompt.playerFourName)
+        
         self.gamePrompt.Close()
-        self.table = Table(self, 3)
+        self.table = Table(self, numberOfPlayers, playerNameList)
 
     def aboutProgram(self, e):
         prompt = wx.MessageDialog(self, 'Created by Jordan Barnes', 'About', wx.OK)
@@ -43,19 +51,116 @@ class MainWindow(wx.Frame):
         prompt.Destroy()
 
     def exitProgram(self, e):
-        self.gamePrompt.Close()
-        self.Close(True)
+        try:
+            self.gamePrompt.Close(True)
+            self.Close(True)
+        except:
+            self.Close(True)
 
 class NewGamePrompt(wx.Frame):
-
     def __init__(self, parent, mainWindow, title, width, height):
         wx.Frame.__init__(self, parent, title=title, size=(width, height), style=wx.SYSTEM_MENU | wx.MINIMIZE_BOX | wx.CAPTION | wx.CLOSE_BOX | wx.CLIP_CHILDREN)
         self.newGameScreen = wx.Panel(self)
-        confirmButton = wx.Button(self.newGameScreen, -1, label='Confirm', pos=(30, 30))
+        
+        self.PLAYERNAMETEXTX = 15
+        self.PLAYERNAMEBOXX = 105
+        
+        # The variables that are used in the Table
+        self.numberOfPlayers = 1
+        self.playerOneName = ""
+        self.playerTwoName = ""
+        self.playerThreeName = ""
+        self.playerFourName = ""
+        
+        # Number of players dropdown
+        self.numberOptions = ['1', '2', '3', '4']
+        self.playersLabel = wx.StaticText(self.newGameScreen, label="Number of Players ", pos=(20, 18))
+        self.numberDropdown = wx.ComboBox(self.newGameScreen, value=self.numberOptions[0], pos=(120, 15), size=(40, -1), choices=self.numberOptions, style=wx.CB_READONLY)
+        self.Bind(wx.EVT_COMBOBOX, self.changePlayers, self.numberDropdown)
+        
+        # Player name box
+        self.playerOneText = wx.StaticText(self.newGameScreen, label="Player 1's Name ", pos=(self.PLAYERNAMETEXTX, 62))
+        self.playerOneNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerOneName, pos=(self.PLAYERNAMEBOXX, 60), size=(80,-1))
+        self.Bind(wx.EVT_TEXT, self.changePlayerOneName, self.playerOneNameBox)
+        self.Bind(wx.EVT_CHAR, self.changePlayerOneName, self.playerOneNameBox)
+        
+        # Confirm button
+        confirmButton = wx.Button(self.newGameScreen, -1, label='Confirm', pos=(55, 220))
         confirmButton.Bind(wx.EVT_BUTTON, mainWindow.newGameStart)
-
+        
+    def changePlayers(self, e):
+        ''' What happens when the number of players is changed.'''
+        try:
+            self.playerOneText.Destroy()
+            self.playerOneNameBox.Destroy()
+            self.playerTwoText.Destroy()
+            self.playerTwoNameBox.Destroy()
+            self.playerThreeText.Destroy()
+            self.playerThreeNameBox.Destroy()
+            self.playerFourText.Destroy()
+            self.playerFourNameBox.Destroy()
+        except:
+            pass
+        self.Refresh()
+        
+        self.numberOfPlayers = int(e.GetString())
+        # Make player name boxes
+        if self.numberOfPlayers is 1:
+            self.playerOneText = wx.StaticText(self.newGameScreen, label="Player 1's Name ", pos=(self.PLAYERNAMETEXTX, 62))
+            self.playerOneNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerOneName, pos=(self.PLAYERNAMEBOXX, 60), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerOneName, self.playerOneNameBox)
+        elif self.numberOfPlayers is 2:
+            self.playerOneText = wx.StaticText(self.newGameScreen, label="Player 1's Name ", pos=(self.PLAYERNAMETEXTX, 62))
+            self.playerOneNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerOneName, pos=(self.PLAYERNAMEBOXX, 60), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerOneName, self.playerOneNameBox)
+            
+            self.playerTwoText = wx.StaticText(self.newGameScreen, label="Player 2's Name ", pos=(self.PLAYERNAMETEXTX, 92))
+            self.playerTwoNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerTwoName, pos=(self.PLAYERNAMEBOXX, 90), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerTwoName, self.playerTwoNameBox)
+        elif self.numberOfPlayers is 3:
+            self.playerOneText = wx.StaticText(self.newGameScreen, label="Player 1's Name ", pos=(self.PLAYERNAMETEXTX, 62))
+            self.playerOneNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerOneName, pos=(self.PLAYERNAMEBOXX, 60), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerOneName, self.playerOneNameBox)
+            
+            self.playerTwoText = wx.StaticText(self.newGameScreen, label="Player 2's Name ", pos=(self.PLAYERNAMETEXTX, 92))
+            self.playerTwoNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerTwoName, pos=(self.PLAYERNAMEBOXX, 90), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerTwoName, self.playerTwoNameBox)
+            
+            self.playerThreeText = wx.StaticText(self.newGameScreen, label="Player 3's Name ", pos=(self.PLAYERNAMETEXTX, 122))
+            self.playerThreeNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerThreeName, pos=(self.PLAYERNAMEBOXX, 120), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerThreeName, self.playerThreeNameBox)
+        elif self.numberOfPlayers is 4:
+            self.playerOneText = wx.StaticText(self.newGameScreen, label="Player 1's Name ", pos=(self.PLAYERNAMETEXTX, 62))
+            self.playerOneNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerOneName, pos=(self.PLAYERNAMEBOXX, 60), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerOneName, self.playerOneNameBox)
+            
+            self.playerTwoText = wx.StaticText(self.newGameScreen, label="Player 2's Name ", pos=(self.PLAYERNAMETEXTX, 92))
+            self.playerTwoNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerTwoName, pos=(self.PLAYERNAMEBOXX, 90), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerTwoName, self.playerTwoNameBox)
+            
+            self.playerThreeText = wx.StaticText(self.newGameScreen, label="Player 3's Name ", pos=(self.PLAYERNAMETEXTX, 122))
+            self.playerThreeNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerThreeName, pos=(self.PLAYERNAMEBOXX, 120), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerThreeName, self.playerThreeNameBox)
+            
+            self.playerFourText = wx.StaticText(self.newGameScreen, label="Player 4's Name ", pos=(self.PLAYERNAMETEXTX, 152))
+            self.playerFourNameBox = wx.TextCtrl(self.newGameScreen, value=self.playerFourName, pos=(self.PLAYERNAMEBOXX, 150), size=(80,-1))
+            self.Bind(wx.EVT_TEXT, self.changePlayerFourName, self.playerFourNameBox)
+            
+    def changePlayerOneName(self, e):
+        self.playerOneName = e.GetString()
+        
+    def changePlayerTwoName(self, e):
+        self.playerTwoName = e.GetString()
+        
+    def changePlayerThreeName(self, e):
+        self.playerThreeName = e.GetString()
+        
+    def changePlayerFourName(self, e):
+        self.playerFourName = e.GetString()
+            
+            
 class Table(wx.Panel):
-    def __init__(self, parent, numberOfPlayers):
+    def __init__(self, parent, numberOfPlayers, playerNames):
         '''Creates a table that creates all variables of the current game.'''
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour((52, 157, 117))
@@ -69,17 +174,23 @@ class Table(wx.Panel):
         self.DEALERCARDY = 30
         self.TEXTSPACING = 50
         if numberOfPlayers == 1:
-            self.player1 = Player('Jordan')
+            self.player1 = Player(playerNames[1])
             self.playerList = [self.player1]
         elif numberOfPlayers == 2:
-            self.player1 = Player('Jordan')
-            self.player2 = Player('Keysi')
+            self.player1 = Player(playerNames[1])
+            self.player2 = Player(playerNames[2])
             self.playerList = [self.player1, self.player2]
         elif numberOfPlayers == 3:
-            self.player1 = Player('Jordan')
-            self.player2 = Player('Keysi')
-            self.player3 = Player('Kitty')
+            self.player1 = Player(playerNames[1])
+            self.player2 = Player(playerNames[2])
+            self.player3 = Player(playerNames[3])
             self.playerList = [self.player1, self.player2, self.player3]
+        elif numberOfPlayers == 4:
+            self.player1 = Player(playerNames[1])
+            self.player2 = Player(playerNames[2])
+            self.player3 = Player(playerNames[3])
+            self.player4 = Player(playerNames[4])
+            self.playerList = [self.player1, self.player2, self.player3, self.player4]
         self.dealer = AI('Dealer', 2000)
         self.playerList.append(self.dealer)
         self.deck = Deck()

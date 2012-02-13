@@ -335,6 +335,7 @@ class Table(wx.Panel):
         height = self.CARDHEIGHT
         x = self.CARDX
         y = self.CARDY
+        # Render the cards at the bottom of the screen (current player's card).
         for card in self.playerList[self.currentPlayer].hand:
             newCard = wx.PaintDC(self)
             newCard.BeginDrawing()
@@ -382,6 +383,7 @@ class Table(wx.Panel):
         x = self.DEALERCARDX
         y = self.DEALERCARDY
         blankCard = True
+        # Render the cards at the top of the screen
         if self.playerList[self.currentPlayer].name is not 'Dealer':
             for card in self.dealer.hand:
                 newCard = wx.PaintDC(self)
@@ -424,9 +426,14 @@ class Table(wx.Panel):
                         newCard.DrawText(letter, x + width - 28, y + height - 36)
                     elif letterWidth == 2:
                         newCard.DrawText(letter, x + width - 35, y + height - 35)
-                    suiteRender = wx.Bitmap(suite)
-                    newCard.DrawBitmap(suiteRender, x, y)
                     newCard.SetTextForeground('black')
+                else:
+                    suite = 'suites/blank.png'
+                
+                # Draws the suite (blank for cards that are flipped)                
+                suiteRender = wx.Bitmap(suite)
+                newCard.DrawBitmap(suiteRender, x, y)
+                    
                 x += self.CARDSPACING
                 blankCard = False
 

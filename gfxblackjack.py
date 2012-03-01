@@ -1,5 +1,7 @@
 import wx
 import os
+import socket
+import threading
 import random
 WIDTH = 800
 HEIGHT = 600
@@ -13,15 +15,26 @@ class MainWindow(wx.Frame):
         menuNew = fileMenu.Append(wx.ID_NEW, 'New Game', '')
         fileMenu.AppendSeparator()
         menuExit = fileMenu.Append(wx.ID_EXIT, 'Exit', '')
+        
+        onlineMenu = wx.Menu()
+        menuConnect = onlineMenu.Append(wx.ID_OPEN, 'Connect', '')
+        menuHost = onlineMenu.Append(wx.ID_REFRESH, 'Host', '')
+        
         helpMenu = wx.Menu()
         menuAbout = helpMenu.Append(wx.ID_ABOUT, 'About', '')
+        
         menuBar = wx.MenuBar()
         menuBar.Append(fileMenu, 'File')
+        menuBar.Append(onlineMenu, 'Online')
         menuBar.Append(helpMenu, 'Help')
         self.SetMenuBar(menuBar)
+        
         self.Bind(wx.EVT_MENU, self.newGamePopup, menuNew)
-        self.Bind(wx.EVT_MENU, self.aboutProgram, menuAbout)
         self.Bind(wx.EVT_MENU, self.exitProgram, menuExit)
+        self.Bind(wx.EVT_MENU, self.hostPopup, menuHost)
+        self.Bind(wx.EVT_MENU, self.connectPopup, menuConnect)
+        self.Bind(wx.EVT_MENU, self.aboutProgram, menuAbout)
+        
         self.titleScreen = wx.Panel(self)
         self.sizer.Add(self.titleScreen, flag=wx.EXPAND)
         startButton = wx.Button(self.titleScreen, -1, label='Start Game', pos=(30, 30))
@@ -44,9 +57,19 @@ class MainWindow(wx.Frame):
         
         self.gamePrompt.Close()
         self.table = Table(self, numberOfPlayers, playerNameList)
-
+        
+    def hostPopup(self, e):
+        ''' Brings up the Online Host popup.'''
+        self.hostPrompt = hostOnline(None, self, 'Host', 200, 300)
+        self.hostPrompt.Show(True)
+        
+    def connectPopup(self, e):
+        ''' Brings up the Online Connect popup.'''
+        self.connectPrompt = connectOnline(None, self, 'Connect', 200, 300)
+        self.connectPrompt.Show(True)
+        
     def aboutProgram(self, e):
-        prompt = wx.MessageDialog(self, 'Created by Jordan Barnes', 'About', wx.OK)
+        prompt = wx.MessageDialog(self, 'Created by Jordan Barnes\nrjordanbarnes@gmail.com', 'About', wx.OK)
         prompt.ShowModal()
         prompt.Destroy()
 
@@ -57,7 +80,89 @@ class MainWindow(wx.Frame):
         except:
             self.Close(True)
 
-class NewGamePrompt(wx.Frame):
+class hostOnline(wx.Frame):
+    def __init__(self, parent, mainWindow, title, width, height):
+        wx.Frame.__init__(self, parent, title=title, size=(width, height), style=wx.SYSTEM_MENU | wx.MINIMIZE_BOX | wx.CAPTION | wx.CLOSE_BOX | wx.CLIP_CHILDREN)
+        self.hostScreen = wx.Panel(self)
+        
+        # Layout Variables
+        self.PLAYERNAMETEXTX = 15
+        self.PLAYERNAMEBOXX = 105
+        self.playerName = ""
+        
+        # Player name box
+        self.playerNameText = wx.StaticText(self.hostScreen, label="Online Name ", pos=(self.PLAYERNAMETEXTX, 62))
+        self.playerNameBox = wx.TextCtrl(self.hostScreen, value=self.playerName, pos=(self.PLAYERNAMEBOXX, 60), size=(80,-1))
+        self.Bind(wx.EVT_TEXT, self.changePlayerName, self.playerNameBox)
+        self.Bind(wx.EVT_CHAR, self.changePlayerName, self.playerNameBox)
+        
+        # Host button
+        hostButton = wx.Button(self.hostScreen, -1, label='Host', pos=(55, 220))
+        hostButton.Bind(wx.EVT_BUTTON, self.startHosting)
+        
+    def changePlayerName(self, e):
+        self.playerName = e.GetString()
+        print self.playerName
+        
+    def startHosting(self, e):
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind(("", 5084))
+        server_socket.listen(5)
+
+        print "Waiting for client..."
+
+        client_socket, address = server_socket.accept()
+        os.system("cls")
+        print "Received a connection from ", address, "\n"
+        while 1:
+            data = raw_input ( "You: " )
+            if (data.lower() == 'q'):
+                client_socket.send (data)
+                client_socket.close()
+                break;
+            else:
+                print "\nWaiting for response..."
+                client_socket.send(data)
+                data = client_socket.recv(512)
+                if (data.lower() == 'q'):
+                    client_socket.close()
+                    break;
+                else:
+                    os.system("cls")
+                    print "Stranger: " , data
+    
+class connectOnline(wx.Frame):
+    def __init__(self, parent, mainWindow, title, width, height):
+        wx.Frame.__init__(self, parent, title=title, size=(width, height), style=wx.SYSTEM_MENU | wx.MINIMIZE_BOX | wx.CAPTION | wx.CLOSE_BOX | wx.CLIP_CHILDREN)
+        self.connectScreen = wx.Panel(self)
+        
+    def startConnecting(self):
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serverInput = raw_input ("Enter IP: ")
+        client_socket.connect((serverInput, 5084))
+        os.system("cls")
+        address = client_socket.getpeername()
+        print "Successfully connected to ", address, "\n"
+        print "\nWaiting for response..."
+        while 1:
+            data = client_socket.recv(512)
+            if (data.lower() == 'q'):
+                client_socket.close()
+                break;
+            else:
+                os.system("cls")
+                print "Stranger: " , data
+                data = raw_input ( "You: " )
+                if (data <> 'Q' and data <> 'q'):
+                    client_socket.send(data)
+                    print "\nWaiting for response..."
+                else:
+                    client_socket.send(data)
+                    client_socket.close()
+                    break;
+    
+class NewGamePrompt(wx.Frame):  
+    ''' The popup that appears that asks for the game parameters (player names, number of players).'''
     def __init__(self, parent, mainWindow, title, width, height):
         wx.Frame.__init__(self, parent, title=title, size=(width, height), style=wx.SYSTEM_MENU | wx.MINIMIZE_BOX | wx.CAPTION | wx.CLOSE_BOX | wx.CLIP_CHILDREN)
         self.newGameScreen = wx.Panel(self)
@@ -157,8 +262,7 @@ class NewGamePrompt(wx.Frame):
         
     def changePlayerFourName(self, e):
         self.playerFourName = e.GetString()
-            
-            
+                 
 class Table(wx.Panel):
     def __init__(self, parent, numberOfPlayers, playerNames):
         '''Creates a table that creates all variables of the current game.'''

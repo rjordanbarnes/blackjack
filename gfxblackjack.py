@@ -1,10 +1,10 @@
 import wx
 import os
 import socket
-import threading
 import random
 WIDTH = 800
 HEIGHT = 600
+
 
 class MainWindow(wx.Frame):
     def __init__(self, parent, title, width, height):
@@ -80,6 +80,7 @@ class MainWindow(wx.Frame):
         except:
             self.Close(True)
 
+
 class hostOnline(wx.Frame):
     def __init__(self, parent, mainWindow, title, width, height):
         wx.Frame.__init__(self, parent, title=title, size=(width, height), style=wx.SYSTEM_MENU | wx.MINIMIZE_BOX | wx.CAPTION | wx.CLOSE_BOX | wx.CLIP_CHILDREN)
@@ -115,22 +116,23 @@ class hostOnline(wx.Frame):
         os.system("cls")
         print "Received a connection from ", address, "\n"
         while 1:
-            data = raw_input ( "You: " )
+            data = raw_input("You: ")
             if (data.lower() == 'q'):
-                client_socket.send (data)
+                client_socket.send(data)
                 client_socket.close()
-                break;
+                break
             else:
                 print "\nWaiting for response..."
                 client_socket.send(data)
                 data = client_socket.recv(512)
                 if (data.lower() == 'q'):
                     client_socket.close()
-                    break;
+                    break
                 else:
                     os.system("cls")
-                    print "Stranger: " , data
-    
+                    print "Stranger: ", data
+
+
 class connectOnline(wx.Frame):
     def __init__(self, parent, mainWindow, title, width, height):
         wx.Frame.__init__(self, parent, title=title, size=(width, height), style=wx.SYSTEM_MENU | wx.MINIMIZE_BOX | wx.CAPTION | wx.CLOSE_BOX | wx.CLIP_CHILDREN)
@@ -138,7 +140,7 @@ class connectOnline(wx.Frame):
         
     def startConnecting(self):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serverInput = raw_input ("Enter IP: ")
+        serverInput = raw_input("Enter IP: ")
         client_socket.connect((serverInput, 5084))
         os.system("cls")
         address = client_socket.getpeername()
@@ -148,12 +150,12 @@ class connectOnline(wx.Frame):
             data = client_socket.recv(512)
             if (data.lower() == 'q'):
                 client_socket.close()
-                break;
+                break
             else:
                 os.system("cls")
                 print "Stranger: " , data
                 data = raw_input ( "You: " )
-                if (data <> 'Q' and data <> 'q'):
+                if (data != 'Q' and data != 'q'):
                     client_socket.send(data)
                     print "\nWaiting for response..."
                 else:
@@ -768,6 +770,7 @@ class Player(object):
 
         return points
 
+
 class AI(Player):
 
     def __init__(self, playerName, money):
@@ -785,4 +788,3 @@ app = wx.App(False)
 frame = MainWindow(None, 'Blackjack', WIDTH, HEIGHT)
 frame.Show(True)
 app.MainLoop()
-

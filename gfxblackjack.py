@@ -9,7 +9,7 @@ HEIGHT = 600
 class MainWindow(wx.Frame):
     def __init__(self, parent, title, width, height):
         wx.Frame.__init__(self, parent, title=title, size=(width, height), style=wx.SYSTEM_MENU | wx.MINIMIZE_BOX | wx.CAPTION | wx.CLOSE_BOX | wx.CLIP_CHILDREN)
-        self.sizer = wx.GridSizer(1, 1)
+        self.sizer = wx.GridSizer(1, 1, 0)
         self.SetSizer(self.sizer)
         fileMenu = wx.Menu()
         menuNew = fileMenu.Append(wx.ID_NEW, 'New Game', '')
@@ -103,26 +103,26 @@ class hostOnline(wx.Frame):
         
     def changePlayerName(self, e):
         self.playerName = e.GetString()
-        print self.playerName
+        print(self.playerName)
         
     def startHosting(self, e):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind(("", 5084))
         server_socket.listen(5)
 
-        print "Waiting for client..."
+        print("Waiting for client...")
 
         client_socket, address = server_socket.accept()
         os.system("cls")
-        print "Received a connection from ", address, "\n"
+        print("Received a connection from ", address, "\n")
         while 1:
-            data = raw_input("You: ")
+            data = input("You: ")
             if (data.lower() == 'q'):
                 client_socket.send(data)
                 client_socket.close()
                 break
             else:
-                print "\nWaiting for response..."
+                print("\nWaiting for response...")
                 client_socket.send(data)
                 data = client_socket.recv(512)
                 if (data.lower() == 'q'):
@@ -130,7 +130,7 @@ class hostOnline(wx.Frame):
                     break
                 else:
                     os.system("cls")
-                    print "Stranger: ", data
+                    print("Stranger: ", data)
 
 
 class connectOnline(wx.Frame):
@@ -140,12 +140,12 @@ class connectOnline(wx.Frame):
         
     def startConnecting(self):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serverInput = raw_input("Enter IP: ")
+        serverInput = input("Enter IP: ")
         client_socket.connect((serverInput, 5084))
         os.system("cls")
         address = client_socket.getpeername()
-        print "Successfully connected to ", address, "\n"
-        print "\nWaiting for response..."
+        print("Successfully connected to ", address, "\n")
+        print("\nWaiting for response...")
         while 1:
             data = client_socket.recv(512)
             if (data.lower() == 'q'):
@@ -153,11 +153,11 @@ class connectOnline(wx.Frame):
                 break
             else:
                 os.system("cls")
-                print "Stranger: " , data
-                data = raw_input ( "You: " )
+                print("Stranger: " , data)
+                data = input ( "You: " )
                 if (data != 'Q' and data != 'q'):
                     client_socket.send(data)
-                    print "\nWaiting for response..."
+                    print("\nWaiting for response...")
                 else:
                     client_socket.send(data)
                     client_socket.close()
@@ -444,11 +444,9 @@ class Table(wx.Panel):
         # Render the cards at the bottom of the screen (current player's card).
         for card in self.playerList[self.currentPlayer].hand:
             newCard = wx.PaintDC(self)
-            newCard.BeginDrawing()
             newCard.SetPen(wx.Pen('black', style=wx.SOLID))
             newCard.SetBrush(wx.Brush('white', wx.SOLID))
             newCard.DrawRectangle(x, y, width, height)
-            newCard.EndDrawing()
             newCard.SetFont(wx.Font(18, wx.FONTFAMILY_SWISS, wx.NORMAL, wx.NORMAL))
             temp = card.split()
             if temp[2] == 'Diamonds':
@@ -493,11 +491,9 @@ class Table(wx.Panel):
         if self.playerList[self.currentPlayer].name is not 'Dealer':
             for card in self.dealer.hand:
                 newCard = wx.PaintDC(self)
-                newCard.BeginDrawing()
                 newCard.SetPen(wx.Pen('black', style=wx.SOLID))
                 newCard.SetBrush(wx.Brush('white', wx.SOLID))
                 newCard.DrawRectangle(x, y, width, height)
-                newCard.EndDrawing()
                 newCard.SetFont(wx.Font(18, wx.FONTFAMILY_SWISS, wx.NORMAL, wx.NORMAL))
                 if blankCard is False:
                     temp = card.split()
@@ -551,11 +547,9 @@ class Table(wx.Panel):
         y = self.DEALERCARDY + 60
         for card in self.dealer.hand:
             newCard = wx.PaintDC(self)
-            newCard.BeginDrawing()
             newCard.SetPen(wx.Pen('black', style=wx.SOLID))
             newCard.SetBrush(wx.Brush('white', wx.SOLID))
             newCard.DrawRectangle(x, y, width, height)
-            newCard.EndDrawing()
             newCard.SetFont(wx.Font(18, wx.FONTFAMILY_SWISS, wx.NORMAL, wx.NORMAL))
             temp = card.split()
             if temp[2] == 'Diamonds':
